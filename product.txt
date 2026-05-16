@@ -1,0 +1,82 @@
+public class ProductController{
+    public Product__c product{get; set;}
+    public List<Product__c>productList{get; set;}
+    public Id selectedId{get; set;}
+    
+    public ProductController(){
+        product=new Product__c();
+        loadProducts();
+    }
+    public void loadProducts(){
+        productList=[
+           SELECT Id,Name,serial_no__c,mf_date__c,expiry_date__c
+           FROM Product__c
+           ORDER BY CreatedDate DESC
+        ];
+    }
+    public PageReference saveProduct(){
+         insert product;
+         product=new Product__c();
+         loadProducts();
+         return null;
+    }
+    public PageReference deleteProduct(){
+         if(selectedId==null){
+             ApexPages.addMessage(
+                new ApexPages.Message(ApexPages.Severity.ERROR,'NO PRODUCT SELECTED')
+             );
+         }
+         Product__c p=[
+             SELECT Id
+             FROM Product__c 
+             WHERE Id=:selectedId
+             LIMIT 1
+         ];
+         
+         delete p;
+         ApexPages.addMessage(
+            new ApexPages.Message(
+                ApexPages.Severity.CONFIRM,
+                'Product deleted successfully'
+            )
+        );
+         loadProducts();
+         return null;
+    }
+}
+
+
+<apex:page controller="ProductController">
+   <apex:form >
+      <apex:pageMessages />
+          <apex:pageBlock title="Prodcut Management System">
+             <apex:pageBlockSection title="Add prodcut" columns="2">
+                 <apex:inputField value="{!product.Name}"/>
+                 <apex:inputField value="{!product.serial_no__c}" />
+                <apex:inputField value="{!product.mf_date__c}" />
+                <apex:inputField value="{!product.expiry_date__c}" />
+                <apex:commandButton value="Save product" action="{!saveProduct}"/>
+             </apex:pageBlockSection>
+             <apex:pageBlock title="Product List">
+                <apex:pageBlockTable value="{!productList}" var="p">
+                   <apex:column value="{!p.Name}" headerValue="Name"/>
+                   <apex:column value="{!p.serial_no__c}" headerValue="Serial No"/>
+                   <apex:column value="{!p.mf_date__c}" 
+                        headerValue="Manufacturing Date" 
+                    />
+
+                   <apex:column value="{!p.expiry_date__c}" 
+                        headerValue="Expiry Date" 
+                    />
+                    <apex:column headerValue="Action">
+                       <apex:commandLink value="Delete Product" action="{!deleteProduct}">
+                         <apex:param name="pid" value="{!p.Id}" assignTo="{!selectedId}"/>
+                   
+                       </apex:commandLink>
+                    </apex:column>
+                    
+                </apex:pageBlockTable>
+             </apex:pageBlock>
+          </apex:pageBlock>
+   </apex:form>
+</apex:page>

@@ -1,0 +1,54 @@
+public class EmailController{
+   public String rEmail{get; set;}
+   public String subject{get; set;}
+   public String body{get; set;}
+   
+   public EmailController(){
+      subject='';
+      body='';
+   }
+   public PageReference sendEmail(){
+       if(rEmail==null || rEmail.trim()==''){
+           ApexPages.addMessage(
+               new ApexPages.Message(ApexPages.Severity.ERROR,'Email is reuqied')
+           );
+           return null;
+       }
+       if(!rEmail.contains('@') && !rEmail.contains('.')){
+            ApexPages.addMessage(
+               new ApexPages.Message(ApexPages.Severity.ERROR,'Email is invalid')
+           );
+           return null;
+       }
+       Messaging.SingleEmailMessage mail=new Messaging.SingleEmailMessage();
+       mail.setToAddresses(new String[] {rEmail});
+       mail.setSubject(subject);
+       mail.setPlainTextBody(body);
+       
+       Messaging.sendEmail(new Messaging.SingleEmailMessage[] {mail});
+       
+        ApexPages.addMessage(
+               new ApexPages.Message(ApexPages.Severity.CONFIRM,'Email sent successfully')
+           );
+           rEmail='';
+           subject='';
+           body='';
+           return null;
+     }
+}
+
+
+<apex:page controller="EmailController">
+  <apex:form >
+     <apex:pageMessages />
+        <apex:pageBlock title="Send Email">
+            <apex:pageBlockSection columns="1">
+               <apex:inputText value="{!recipientEmail}" label="Recipient Email"/>
+               <apex:inputText value="{!subject}" label="Subject"/>
+               <apex:inputTextarea value="{!body}" label="Body" rows="5" cols="50"/>
+            </apex:pageBlockSection>
+            
+            <apex:commandButton value="Send Email" action="{!sendEmail}"/>
+        </apex:pageBlock>
+      </apex:form>
+</apex:page>

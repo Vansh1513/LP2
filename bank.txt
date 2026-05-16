@@ -1,0 +1,153 @@
+public class BankAccountManagement{
+    public static void addCustomer(String name,Decimal empId,String email,Date bdate,String dept){
+        Customer__c c=new Customer__c();
+        
+        c.Name=name;
+        c.Emp_ID__c=empId;
+        c.Email__c=email;
+        c.Birth_Date__c=bdate;
+        c.Dept__c=dept;
+        
+        insert c;
+        
+        System.debug('Customer added successfully');
+    }
+    //display
+    public static void display(){
+        List<Customer__c> cust=[
+            SELECT Id,Name,Emp_ID__c,Email__c,Birth_Date__c,Dept__c
+            FROM Customer__c
+            ORDER BY CreatedDate DESC
+        ];
+        for(Customer__c c:cust){
+            System.debug('ID: '+c.Id);
+            System.debug('Name: '+c.name);
+            System.debug('Email: '+c.Email__c);
+        }
+    }
+    //update
+    public static void updateCustomer(Id empId,String newDept,String newEmail){
+        Customer__c c=[
+            SELECT Id,Email__c,Dept__c
+            FROM Customer__c
+            WHERE Id=:empId
+            LIMIT 1
+        ];
+        c.Dept__c=newDept;
+        c.Email__c=newEmail;
+        
+        update c;
+        
+        System.debug('Customer updated successfully');
+        
+    }
+    //delete
+    public static  void deleteCustomer(Id empId){
+       Customer__c c=[
+         SELECT Id
+         FROM Customer__c 
+         WHERE Id=:empId
+         LIMIT 1
+       ];
+       delete c;
+       System.debug('Customer deleted successfully');
+    }
+}
+
+
+
+public class EmployeeManagement{
+   //Add employee
+   public static void addEmployee(String Name,Decimal empId,String dept,Decimal salary){
+       Employee__c e=new Employee__c();
+       
+       e.Name=Name;
+       e.Employee_ID__c=empId;
+       e.Dept__c=dept;
+       e.Salary__c=salary;
+       
+       insert e;
+       
+       System.debug('Employee inserted successfully');
+   }
+   //display
+   public static void display(){
+      List<Employee__c> empList=[
+         SELECT Id,Name,Employee_ID__c,Dept__c,Salary__c
+         FROM Employee__c
+         ORDER BY CreatedDate DESC
+      ];
+      for(Employee__c e:empList){
+          System.debug('Emplyee Name: '+e.Name);
+          System.debug('Employee ID: ' + e.Employee_ID__c);
+          System.debug('Department: ' + e.Dept__c);
+          System.debug('Salary: ' + e.Salary__c);
+          System.debug('-----------------------------');
+      }
+   }
+   //update employee
+   public static void updateEmployee(Id empId,String newDept,Decimal newSalary){
+      List<Employee__c> e=[
+         SELECT Id,Dept__c,Salary__c
+         FROM Employee__c
+         WHERE Id=:empId
+         LIMIT 1
+      ];
+      if(e.size()>0){
+         e[0].Dept__c=newDept;
+         e[0].Salary__c=newSalary;
+         
+         update e[0];
+         
+         System.debug('Employee updated successfully');
+       }
+       else{
+           System.debug('Employee not found');
+       }
+   }
+   //delete 
+   public static void deleteEmployee(Id empId){
+      List<Employee__c> e=[
+         SELECT Id
+         FROM Employee__c
+         WHERE Id=:empId
+         LIMIT 1
+      ];
+      if(e.size()>0){
+         delete e[0];
+         System.debug('Employee deleted successfully');
+      }
+      else{
+         System.debug('Employee not found');
+      }
+      
+   }
+}
+
+
+
+public class EmailNotificationService {
+
+    public static void sendEmailNotification(String recipientEmail, String subject, String body) {
+
+        if(recipientEmail == null || recipientEmail.trim() == '') {
+            System.debug('Please enter recipient email address');
+            return;
+        }
+
+        if(!recipientEmail.contains('@')) {
+            System.debug('Please enter valid email address');
+            return;
+        }
+
+        Messaging.SingleEmailMessage mail = new Messaging.SingleEmailMessage();
+
+        mail.setToAddresses(new String[] { recipientEmail });
+        mail.setSubject(subject);
+        mail.setPlainTextBody(body);
+
+        Messaging.sendEmail(new Messaging.SingleEmailMessage[] { mail });
+
+        System.debug('Email sent successfully to: ' + recipientEmail);
+    }
+}

@@ -1,0 +1,71 @@
+public class StudentController{
+    public Student__c student{get; set;}
+    public List<Student__c> studentList{get; set;}
+    public Id selectedId{get; set;}
+    
+    public StudentController(){
+        student=new Student__c();
+        loadStudents();
+    }
+    public void loadStudents(){
+        studentList=[
+            SELECT Id,Name,R__c,Class__c,mobile_no__c
+            FROM Student__c 
+            ORDER BY CreatedDate DESC
+        ];
+    }
+    public PageReference saveStudent(){
+         insert student;
+         student=new Student__c();
+         loadStudents();
+         return null;
+    }
+    public PageReference deleteStudent(){
+         if(selectedId==null){
+             ApexPages.addMessage(
+                 new ApexPages.Message(ApexPages.Severity.ERROR,'No record selected')
+             );
+             return null;
+         }
+         Student__c s=[
+            SELECT Id
+            FROM Student__c
+            WHERE Id=:selectedId
+            LIMIT 1
+         ];
+         delete s;
+         loadStudents();
+         return null;
+    }
+}
+
+
+<apex:page controller="StudentController">
+  <apex:form >
+     <apex:pageMessages />
+        <apex:pageBlock title="Student Management System">
+            <apex:pageBlockSection title="Add Student" columns="2">
+                <apex:inputField value="{!student.Name}" label="Student Name"/>
+                <apex:inputField value="{!student.R__c}" label="Roll No"/>
+                <apex:inputField value="{!student.Class__c}" label="Class"/>
+                <apex:inputField value="{!student.mobile_no__c}" label="Mobile No"/>
+                
+                <apex:commandButton value="Save Student" action="{!saveStudent}"/>
+            </apex:pageBlockSection>
+            
+            <apex:pageBlockSection title="Student List" columns="1">
+                 <apex:pageBlockTable value="{!studentList}" var="s">
+                    <apex:column value="{!s.Name}" headerValue="Student Name"/>
+                    <apex:column value="{!s.R__c}" headerValue="Roll No"/>
+                    <apex:column value="{!s.Class__c}" headerValue="Class"/>
+                    <apex:column value="{!s.mobile_no__c}" headerValue="Mobile No"/>
+                    <apex:column headerValue="action">
+                       <apex:commandLink value="Delete student" action="{!deleteStudent}">
+                          <apex:param name="sid" value="{!s.Id}" assignTo="{!selectedId}"/>
+                       </apex:commandLink>
+                    </apex:column>
+                 </apex:pageBlockTable>
+            </apex:pageBlockSection>
+        </apex:pageBlock>
+  </apex:form>
+</apex:page>
